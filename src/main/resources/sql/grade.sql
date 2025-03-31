@@ -1,0 +1,22 @@
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('1', '0', 'P2', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('2', '1', 'P3', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('3', '2', 'P4', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('4', '3', 'P5', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('5', '4', 'P6', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('6', '5', 'S7', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('7', '6', 'S8', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('8', '7', 'S9', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('9', '8', 'S10', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('10', '9','S10E', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('11', '10','TT6', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('12', '11','TT8', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('13', '12','TT8E', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('14', '13','SRW4', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('15', '14','SRW5', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('16', '15','SRW6', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('17', '16','SRW7', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('18', '17','SRW8', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('19', '18','JMSS', CURDATE());
+INSERT INTO jac.Grade (code, previous, name, registerDate) VALUES ('20', '19','VCE', CURDATE());
+
+COMMIT;
