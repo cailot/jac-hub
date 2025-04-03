@@ -101,12 +101,14 @@
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/DayScheduleDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/repository/StudentTestRepository.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/repository/BookRepository.java
+/Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/service/StudentService.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/BookDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/CourseDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/InvoiceDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/utils/UsernameGenerator.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/StudentTestDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/repository/PracticeRepository.java
+/Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/service/impl/StudentServiceImpl.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/HomeworkDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/dto/AttendanceListDTO.java
 /Users/javacoffee/dev/workspace/jac-hub/src/main/java/hyung/jin/seo/jae/repository/OnlineSessionRepository.java

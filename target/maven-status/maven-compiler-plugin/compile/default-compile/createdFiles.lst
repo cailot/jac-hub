@@ -5,6 +5,7 @@ hyung/jin/seo/jae/repository/PracticeRepository.class
 hyung/jin/seo/jae/service/OmrService.class
 hyung/jin/seo/jae/dto/OnlineActivityDTO.class
 hyung/jin/seo/jae/model/LoginActivity.class
+hyung/jin/seo/jae/service/StudentService.class
 hyung/jin/seo/jae/dto/StudentWithEnrolmentDTO.class
 hyung/jin/seo/jae/dto/SubjectDTO.class
 hyung/jin/seo/jae/dto/OnlineSessionDTO.class
@@ -72,6 +73,7 @@ hyung/jin/seo/jae/utils/JaeUtils.class
 hyung/jin/seo/jae/model/StudentTest.class
 hyung/jin/seo/jae/dto/TestResultHistoryDTO.class
 hyung/jin/seo/jae/dto/OmrScanResultDTO.class
+hyung/jin/seo/jae/service/impl/StudentServiceImpl.class
 hyung/jin/seo/jae/model/Enrolment.class
 hyung/jin/seo/jae/dto/TestAnswerDTO.class
 hyung/jin/seo/jae/repository/NoticeEmailRepository.class

@@ -27,8 +27,8 @@ public class OmrController {
     @Autowired
     private OmrService omrService;
 
-    @Value("${output.directory}")
-    private String outputDir;
+    // @Value("${output.directory}")
+    // private String outputDir;
 
 
     @GetMapping("/hi")
