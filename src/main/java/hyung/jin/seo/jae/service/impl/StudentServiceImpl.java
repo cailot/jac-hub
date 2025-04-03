@@ -10,7 +10,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -210,13 +210,13 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	@Transactional
 	public void updatePassword(Long id, String password) {
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(password);
-		try{
-			studentRepository.updatePassword(id, encodedPassword);
-		}catch(Exception e){
-			System.out.println("No student found");
-		}	
+		// BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		// String encodedPassword = passwordEncoder.encode(password);
+		// try{
+		// 	studentRepository.updatePassword(id, encodedPassword);
+		// }catch(Exception e){
+		// 	System.out.println("No student found");
+		// }	
 	}
 
 	@Override
@@ -447,6 +447,17 @@ public class StudentServiceImpl implements StudentService {
 			System.out.println("No student found");
 		}
 		return name;
+	}
+
+	@Override
+	public String getBranch(Long id) {
+		String branch = "0";
+		try{
+			branch = studentRepository.findBranchById(id);
+		}catch(Exception e){
+			System.out.println("No student found");
+		}
+		return branch;
 	}
 
 }

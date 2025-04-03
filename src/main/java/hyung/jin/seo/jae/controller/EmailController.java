@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import hyung.jin.seo.jae.dto.NoticeEmailDTO;
 import hyung.jin.seo.jae.model.NoticeEmail;
-import hyung.jin.seo.jae.service.CodeService;
 import hyung.jin.seo.jae.service.EmailService;
-import hyung.jin.seo.jae.service.StudentService;
 import hyung.jin.seo.jae.utils.JaeConstants;
 
 @Controller
@@ -27,43 +25,43 @@ public class EmailController {
 	@Autowired
 	private EmailService emailService;
 
-	@Autowired
-	private CodeService codeService;
+	// @Autowired
+	// private CodeService codeService;
 
-	@Autowired
-	private StudentService studentService;
+	// @Autowired
+	// private StudentService studentService;
 
-	@GetMapping("/sendAnnouncement")
-	@ResponseBody
-    public ResponseEntity<String> emailAnnouncement(@RequestParam String state, @RequestParam String branch, @RequestParam String grade, @RequestParam String sender, @RequestParam String subject, @RequestParam String body){
-		try{
-			// 1. get sender email address
-			String fromEmail = codeService.getBranchEmail(sender);
-			fromEmail = "braybrook@jamesancollegevic.com.au";
-			// 2. get receipients
-			List<String> receipients = studentService.getBranchReceipents(state, branch, grade);
-			int size = receipients.size();
-			receipients = new ArrayList<String>();
-			receipients.add("cailot@naver.com");
-			receipients.add("jh05052008@gmail.com");
-			// 3. send email
-			emailService.sendEmail(fromEmail, receipients, subject, body);
-			// 4. save email to database
-			NoticeEmail notice = new NoticeEmail();
-			notice.setState(state);
-			notice.setBranch(branch);
-			notice.setGrade(grade);
-			notice.setSender(sender);
-			notice.setTitle(subject);
-			notice.setBody(body);
-			emailService.saveNoticeEmail(notice);
-			// 5. return response
-			return ResponseEntity.ok(size+"");
-		}catch(Exception e){
-			String message = "\"Error sending email : " + e.getMessage() + "\"";
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
-		}
-    }
+	// @GetMapping("/sendAnnouncement")
+	// @ResponseBody
+    // public ResponseEntity<String> emailAnnouncement(@RequestParam String state, @RequestParam String branch, @RequestParam String grade, @RequestParam String sender, @RequestParam String subject, @RequestParam String body){
+	// 	try{
+	// 		// 1. get sender email address
+	// 		String fromEmail = codeService.getBranchEmail(sender);
+	// 		fromEmail = "braybrook@jamesancollegevic.com.au";
+	// 		// 2. get receipients
+	// 		List<String> receipients = studentService.getBranchReceipents(state, branch, grade);
+	// 		int size = receipients.size();
+	// 		receipients = new ArrayList<String>();
+	// 		receipients.add("cailot@naver.com");
+	// 		receipients.add("jh05052008@gmail.com");
+	// 		// 3. send email
+	// 		emailService.sendEmail(fromEmail, receipients, subject, body);
+	// 		// 4. save email to database
+	// 		NoticeEmail notice = new NoticeEmail();
+	// 		notice.setState(state);
+	// 		notice.setBranch(branch);
+	// 		notice.setGrade(grade);
+	// 		notice.setSender(sender);
+	// 		notice.setTitle(subject);
+	// 		notice.setBody(body);
+	// 		emailService.saveNoticeEmail(notice);
+	// 		// 5. return response
+	// 		return ResponseEntity.ok(size+"");
+	// 	}catch(Exception e){
+	// 		String message = "\"Error sending email : " + e.getMessage() + "\"";
+	// 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+	// 	}
+    // }
 
 	// email list for branchEmail.jsp
 	@GetMapping("/emailList")
