@@ -163,13 +163,7 @@ public class OmrServiceImpl implements OmrService {
 		BlobClient blobClient = containerClient.getBlobClient(blobPath);
 		// Set content-type
 		BlobHttpHeaders headers = new BlobHttpHeaders().setContentType("image/jpeg");
-		// BlobParallelUploadOptions options = new BlobParallelUploadOptions(new ByteArrayInputStream(fileData)).setHeaders(headers);
-		// // Upload the file
-		// blobClient.uploadWithResponse(
-		// 	options,
-		// 	null,          // Timeout (optional)
-		// 	Context.NONE   // Context
-		// );
+		// Upload the file
 		blobClient.upload(new ByteArrayInputStream(fileData), fileData.length, true);
 		blobClient.setHttpHeaders(headers);
 
