@@ -26,6 +26,17 @@ import com.aspose.omr.License;
 import com.aspose.omr.OmrEngine;
 import com.aspose.omr.RecognitionResult;
 import com.aspose.omr.TemplateProcessor;
+import com.azure.core.util.Context;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobHttpHeaders;
+import com.azure.storage.blob.options.BlobParallelUploadOptions;
+// import com.azure.storage.blob.BlobClient;
+// import com.azure.storage.blob.BlobContainerClient;
+// import com.azure.storage.blob.BlobServiceClient;
+// import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.file.share.ShareFileClient;
 import com.azure.storage.file.share.ShareFileClientBuilder;
 
@@ -41,9 +52,9 @@ public class OmrServiceImpl implements OmrService {
 	private OmrEngine engine;
 
 	private License omrLicense;
+	
+	// private String prefix = "https://jacstorage.blob.core.windows.net/work/pdf/";
 
-	// @Value("${output.directory}")
-    // private String outputDir;
 
 	@Value("${azure.file.connection}")
 	private String azureConnection;
@@ -84,7 +95,7 @@ public class OmrServiceImpl implements OmrService {
 
 
 
-			
+
 			// Use ByteArrayOutputStream to hold the image data in memory
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(image, "jpg", baos);
@@ -92,7 +103,7 @@ public class OmrServiceImpl implements OmrService {
 			
 			// Upload the image bytes directly to Azure
 			String fileName = branch + "_" + (i + 1) + "_" + System.currentTimeMillis() + ".jpg";
-			uploadToAzure(fileName, imageBytes);
+			uploadToAzureBlob(fileName, imageBytes);
 
 			
 
@@ -125,21 +136,44 @@ public class OmrServiceImpl implements OmrService {
 		return processed;
 	}
 
-	/**
-	 * Create file in Azure Storage
-	 * 
-	 */
-	private void uploadToAzure(String fileName, byte[] fileData) {
+	
+	// Create file in Azure File Storage
+	private void uploadToAzureFile(String fileName, byte[] fileData) {
 		ShareFileClient fileClient = new ShareFileClientBuilder()
 				.connectionString(azureConnection)
 				.shareName("pdf")
 				.resourcePath("temp/" + fileName)
 				.buildFileClient();
-
 		fileClient.create(fileData.length);
-		// fileClient.upload(new ByteArrayInputStream(fileData), fileData.length); 	
 		fileClient.uploadRange(new ByteArrayInputStream(fileData), fileData.length);	
-		System.out.println("Temp file uploaded to Azure : " + fileName);
+		System.out.println("Temp file uploaded to Azure >>> " + fileName);
+	}
+
+	// Create file in Azure Blob Storage
+	private void uploadToAzureBlob(String fileName, byte[] fileData) {
+		// Create a BlobServiceClient
+		BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+		.connectionString(azureConnection)
+		.buildClient();
+		// Access the container: work
+		BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient("work");
+		// Define the full path inside the container (folder structure emulated using slashes)
+		String blobPath = "pdf/" + fileName;
+		// Get a blob client
+		BlobClient blobClient = containerClient.getBlobClient(blobPath);
+		// Set content-type
+		BlobHttpHeaders headers = new BlobHttpHeaders().setContentType("image/jpeg");
+		// BlobParallelUploadOptions options = new BlobParallelUploadOptions(new ByteArrayInputStream(fileData)).setHeaders(headers);
+		// // Upload the file
+		// blobClient.uploadWithResponse(
+		// 	options,
+		// 	null,          // Timeout (optional)
+		// 	Context.NONE   // Context
+		// );
+		blobClient.upload(new ByteArrayInputStream(fileData), fileData.length, true);
+		blobClient.setHttpHeaders(headers);
+
+		System.out.println("Temp file uploaded to Azure >>> " + fileName);
 	}
 	
 }

@@ -31,7 +31,6 @@
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
         <!-- Spring Boot dependencies -->
         <dependency>
@@ -105,7 +104,6 @@
             <version>2.0.24</version>
         </dependency>
 
-
 		<!-- JFreeChart for chart generation -->
 		<dependency>
 			<groupId>org.jfree</groupId>
@@ -118,14 +116,18 @@
 			<version>1.0.24</version>
 		</dependency>
 
-
-
-
         <!-- Azure file share -->
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-file-share</artifactId>
             <version>12.20.0</version>
+        </dependency>
+
+        <!-- Azure blob container-->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-storage-blob</artifactId>
+            <version>12.25.0</version> <!-- or latest available -->
         </dependency>
 
         <!-- Compatible reactor core/netty -->
@@ -139,21 +141,6 @@
             <artifactId>reactor-netty-http</artifactId>
             <version>1.0.34</version>
         </dependency>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     </dependencies>
     <!-- Aspose Repository -->
