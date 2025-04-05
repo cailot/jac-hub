@@ -136,7 +136,6 @@ public class OmrServiceImpl implements OmrService {
 		return processed;
 	}
 
-	
 	// Create file in Azure File Storage
 	private void uploadToAzureFile(String fileName, byte[] fileData) {
 		ShareFileClient fileClient = new ShareFileClientBuilder()
