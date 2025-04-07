@@ -40,6 +40,7 @@ import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import com.azure.storage.file.share.ShareFileClient;
 import com.azure.storage.file.share.ShareFileClientBuilder;
 
+import hyung.jin.seo.jae.dto.OmrSheetDTO;
 import hyung.jin.seo.jae.dto.OmrUploadDTO;
 import hyung.jin.seo.jae.dto.StudentTestDTO;
 import hyung.jin.seo.jae.model.Student;
@@ -74,9 +75,9 @@ public class OmrServiceImpl implements OmrService {
 
 
 	@Override
-	public List<StudentTestDTO> previewOmr(String branch, MultipartFile file) throws IOException {
+	public List<OmrSheetDTO> previewOmr(String branch, MultipartFile file) throws IOException {
 		// 1. create List
-		List<StudentTestDTO> processed = new ArrayList<>();
+		List<OmrSheetDTO> processed = new ArrayList<>();
 		
 		// 2. split pages
 		PDDocument document = PDDocument.load(file.getInputStream());
@@ -90,6 +91,8 @@ public class OmrServiceImpl implements OmrService {
 		for(int i=0; i<numPages; i++) {
 			// render the PDF page to an image with 100 DPI JPG format
 			BufferedImage image = renderer.renderImageWithDPI(i, 100, ImageType.RGB);
+			// create OmrSheetDTO to contain StudentTestDTO
+			OmrSheetDTO omrSheet = new OmrSheetDTO();
 			// process the image
 
 
@@ -112,21 +115,43 @@ public class OmrServiceImpl implements OmrService {
 			// 3~6 random number
 			long stdTempId = 11200000 + (i+1);
 			Student stdTemp = studentService.getStudent(stdTempId);
-			StudentTestDTO dto = new StudentTestDTO();
-			dto.setFileName(fileName);
-            int testId = new Random().nextInt(4) + 3;
-            dto.setTestId((long)testId);
-            dto.setTestName("Mega Test");
+			int testId = new Random().nextInt(4) + 3;
+            
+
+			// english
+			StudentTestDTO dto1 = new StudentTestDTO();
+			dto1.setFileName(fileName);
+            dto1.setTestId((long)testId);
+            dto1.setTestName("Mega Test");
             // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
-            dto.setStudentId(stdTempId);
-            dto.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
+            dto1.setStudentId(stdTempId);
+            dto1.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
             for(int j=0; j<40; j++) {
                 // generate radom number from 0 to 4
                 int radom = new Random().nextInt(5);
-                dto.addAnswer(radom);
+                dto1.addAnswer(radom);
             }
+
+
+			// math
+			StudentTestDTO dto2 = new StudentTestDTO();
+			dto2.setFileName(fileName);
+            dto2.setTestId((long)testId);
+            dto2.setTestName("Mega Test");
+            // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
+            dto2.setStudentId(stdTempId);
+            dto2.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
+            for(int j=0; j<40; j++) {
+                // generate radom number from 0 to 4
+                int radom = new Random().nextInt(5);
+                dto2.addAnswer(radom);
+            }
+
+
 			/// /////////////////////////////////
-			processed.add(dto);
+			omrSheet.addStudentTest(dto1);
+			omrSheet.addStudentTest(dto2);
+			processed.add(omrSheet);
 			System.out.println("Saved: " + fileName);
 
 		}
