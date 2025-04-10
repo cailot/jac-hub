@@ -115,7 +115,7 @@ public class OmrServiceImpl implements OmrService {
 			// 3~6 random number
 			long stdTempId = 11200000 + (i+1);
 			Student stdTemp = studentService.getStudent(stdTempId);
-			int testId = new Random().nextInt(4) + 3;
+			int testId = new Random().nextInt(10) + 10;
             
 
 			// english
@@ -147,10 +147,25 @@ public class OmrServiceImpl implements OmrService {
                 dto2.addAnswer(radom);
             }
 
+			// GA
+			StudentTestDTO dto3 = new StudentTestDTO();
+			dto3.setFileName(fileName);
+            dto3.setTestId((long)testId);
+            dto3.setTestName("Mega Test");
+            // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
+            dto3.setStudentId(stdTempId);
+            dto3.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
+            for(int j=0; j<40; j++) {
+                // generate radom number from 0 to 4
+                int radom = new Random().nextInt(5);
+                dto3.addAnswer(radom);
+            }
+
 
 			/// /////////////////////////////////
 			omrSheet.addStudentTest(dto1);
 			omrSheet.addStudentTest(dto2);
+			omrSheet.addStudentTest(dto3);
 			processed.add(omrSheet);
 			System.out.println("Saved: " + fileName);
 

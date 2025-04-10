@@ -30,8 +30,8 @@ public class JaeApplication extends SpringBootServletInitializer implements Comm
 	// @Autowired
 	// private PropertiesService propertiesService;
 	
-	// @Autowired
-	// private EmailService emailService;
+	@Autowired
+	private EmailService emailService;
 
 	// @Autowired
 	// private PdfService pdfService;
@@ -65,6 +65,9 @@ public class JaeApplication extends SpringBootServletInitializer implements Comm
 
 		// recognise image
 		// omrService.recogniseImage("src/main/resources/omr/template3.omr", "target/5.png");
+
+		// send email
+		//emailService.sendEmail("assessment@jamesancollegevic.com.au", "cailot@naver.com", "test title", "no body....");
 
 		System.out.println("************* Done *************");
 	}
