@@ -3,3 +3,9 @@
 target/*.war
 /docs/
 src/main/resources/application.properties
+
+# Application properties
+**/application.properties
+target/classes/application.properties
+src/main/resources/application.properties
+target/ROOT/WEB-INF/classes/application.properties
