@@ -409,4 +409,10 @@ public interface JaeConstants {
 	String OMR_FILE_JPEG = "jpeg";
 
 	String OMR_FILE_PDF = "pdf";
+
+	String OMR_FOLDER = "omr";
+
+	String TEST_FOLDER = "test";
+
+	String WORK_FOLDER = "work";
 }
