@@ -388,15 +388,15 @@ public interface JaeConstants {
 	
 	// String PRACTICE_TYPE_NAPLAN = "NAPLAN";
 
-	// int PRACTICE_MEGA = 1;
+	String MEGA_TEST = "1";
 	
-	// int PRACTICE_REVISION = 2;
+	String REVISION_TEST = "2";
 	
-	// int PRACTICE_EDU = 3;
+	String EDU_TEST = "3";
 	
-	// int PRACTICE_ACER = 4;
+	String ACER_TEST = "4";
 	
-	// int PRACTICE_NAPLAN = 5;
+	String MOCK_TEST = "5";
 
 	////////////////////////////////////
 	//

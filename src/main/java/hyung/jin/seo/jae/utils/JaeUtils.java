@@ -247,4 +247,18 @@ public class JaeUtils {
 		}
 	}
 
+	// return Test Group name
+	public static String getTestName(String value){
+		String testText = "";
+		switch(value) {
+			case "1": testText = "Mega Test"; break;
+			case "2": testText = "Revision Test"; break;
+			case "3": testText = "Edu Test"; break;
+			case "4": testText = "Acer Test"; break;
+			case "5": testText = "Mock Test"; break;
+		}
+		return testText;
+
+	}
+
 }

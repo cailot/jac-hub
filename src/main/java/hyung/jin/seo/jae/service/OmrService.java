@@ -20,7 +20,7 @@ public interface OmrService {
 
 	// preview the OMR
 	//List<StudentTestDTO> previewOmr(String branch, MultipartFile file) throws IOException;
-	List<OmrSheetDTO> previewOmr(String branch, MultipartFile file) throws IOException;
+	List<OmrSheetDTO> previewOmr(String branch, String testGroup, String grade, String volume, MultipartFile file) throws IOException;
 
 	// save the OMR
 	// boolean saveOmr(OmrUploadDTO meta, List<StudentTestDTO> studentTestDTOs);

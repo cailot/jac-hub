@@ -9,12 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -45,10 +48,16 @@ import com.azure.storage.file.share.ShareFileClientBuilder;
 import hyung.jin.seo.jae.dto.OmrSheetDTO;
 import hyung.jin.seo.jae.dto.OmrUploadDTO;
 import hyung.jin.seo.jae.dto.StudentTestDTO;
+import hyung.jin.seo.jae.dto.TestDTO;
 import hyung.jin.seo.jae.model.Student;
 import hyung.jin.seo.jae.service.OmrService;
 import hyung.jin.seo.jae.service.StudentService;
+import hyung.jin.seo.jae.service.ConnectedService;
 import hyung.jin.seo.jae.utils.JaeConstants;
+import hyung.jin.seo.jae.utils.JaeUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class OmrServiceImpl implements OmrService {
@@ -61,15 +70,18 @@ public class OmrServiceImpl implements OmrService {
 
 	private TemplateProcessor ttProcessor;
 
+	private String baseDir = "src/main/resources/static/assets/pdf/jpg";
 
-	// private String prefix = "https://jacstorage.blob.core.windows.net/work/omr/";
-
+	private static int OMR_THRESHOLD = 30;
 
 	@Value("${azure.storage.connection}")
 	private String azureConnection;
 
 	@Autowired
 	private StudentService studentService;
+
+	@Autowired
+	private ConnectedService ConnectedService;
 
 	public OmrServiceImpl() {
 		omrLicense = new License();
@@ -85,7 +97,7 @@ public class OmrServiceImpl implements OmrService {
 
 
 	@Override
-	public List<OmrSheetDTO> previewOmr(String branch, MultipartFile file) throws IOException {
+	public List<OmrSheetDTO> previewOmr(String branch, String testGroup, String grade, String volume, MultipartFile file) throws IOException {
 		// 1. create List
 		List<OmrSheetDTO> processed = new ArrayList<>();
 		
@@ -94,204 +106,92 @@ public class OmrServiceImpl implements OmrService {
 		PDFRenderer renderer = new PDFRenderer(document);
 		int numPages = document.getNumberOfPages();
 
-		// Path tempDir = Files.createTempDirectory("omr_jpg_");
-		// Path tempDirPath = Path.of(outputDir);
+		// 3. Create directory to save files into local disk
+		Path batchDir = Paths.get(baseDir);
+		Files.createDirectories(batchDir);
 
+		try {
+			for(int i=0; i<numPages; i++) {
+				// render the PDF page to an image with 100 DPI JPG format
+				BufferedImage image = renderer.renderImageWithDPI(i, 200, ImageType.RGB);
+				// create OmrSheetDTO to contain StudentTestDTO
+				OmrSheetDTO omrSheet = new OmrSheetDTO();
+				// process the image
 
-		for(int i=0; i<numPages; i++) {
-			// render the PDF page to an image with 100 DPI JPG format
-			BufferedImage image = renderer.renderImageWithDPI(i, 100, ImageType.RGB);
-			// create OmrSheetDTO to contain StudentTestDTO
-			OmrSheetDTO omrSheet = new OmrSheetDTO();
-			// process the image
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			// Process the image using Aspose OMR
-			// try {
-			// 	// Create recognition results from the image
-			// 	RecognitionResult[] results = megaProcessor.recognizeImage(image);
+				// Use ByteArrayOutputStream to hold the image data in memory
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(image, "jpg", baos);
+				byte[] imageBytes = baos.toByteArray();
 				
-			// 	if (results != null && results.length > 0) {
-			// 		// Get the first result
-			// 		RecognitionResult result = results[0];
+				String fileName = branch + "_" + (i + 1) + "_" + System.currentTimeMillis() + ".jpg";
+				Path tempFile = batchDir.resolve(fileName);
+				
+				try {
+					// Write file
+					Files.write(tempFile, imageBytes);
+					// System.out.println("File created at: " + tempFile);
+
+					// 4. Process OMR scanning sheet
+					// Check test type - Mega/Revision, Edu/Acer, Mock
+					if(StringUtils.equalsIgnoreCase(testGroup, JaeConstants.MEGA_TEST) || StringUtils.endsWithIgnoreCase(testGroup, JaeConstants.REVISION_TEST)){
+						// Process OMR
+						omrSheet = processMega(tempFile.toString());
+					}else{
+						// Process OMR
+						omrSheet = processTT(tempFile.toString());
+					}
 					
-			// 		// Get all answers from the OMR sheet
-			// 		Map<String, String> answers = result.getAnswers();
-					
-			// 		// Process each answer and add to omrSheet
-			// 		for (Map.Entry<String, String> entry : answers.entrySet()) {
-			// 			String questionId = entry.getKey();
-			// 			String answer = entry.getValue();
-						
-			// 			// Create StudentTestDTO and populate with recognized data
-			// 			StudentTestDTO testDTO = new StudentTestDTO();
-			// 			testDTO.setFileName(branch + "_" + (i + 1));
-						
-			// 			// Parse the answer and add to DTO
-			// 			// Assuming answer is a single character A-E or 1-5
-			// 			int answerValue = -1;
-			// 			if (answer != null && !answer.trim().isEmpty()) {
-			// 				if (answer.matches("[A-E]")) {
-			// 					answerValue = answer.charAt(0) - 'A';
-			// 				} else if (answer.matches("[1-5]")) {
-			// 					answerValue = Integer.parseInt(answer) - 1;
-			// 				}
-			// 				if (answerValue >= 0) {
-			// 					testDTO.addAnswer(answerValue);
-			// 				}
-			// 			}
-						
-			// 			omrSheet.addTest(testDTO);
-			// 		}
-			// 	}
-				
-			// 	// Add processed sheet to the list
-			// 	processed.add(omrSheet);
-				
-			// } catch (Exception e) {
-			// 	e.printStackTrace();
-			// 	// Log error but continue processing other pages
-			// 	System.err.println("Error processing page " + (i + 1) + ": " + e.getMessage());
-			// }
+					// 5. Upload to Azure
+					uploadJpgToAzureBlob(fileName, Files.readAllBytes(tempFile));
 
+				} finally {
+					// 6. Delete individual file on local disk after processing
+					try {
+						Files.deleteIfExists(tempFile);
+					} catch (IOException e) {
+						System.err.println("Error deleting temporary file: " + e.getMessage());
+					}
+				}
 
+				/// /////////////////////////////////
+				omrSheet.setFileName(fileName);
+				omrSheet.setTestId(1L); // get testId by testTypeId, grade, volume
+				omrSheet.setTestName(JaeUtils.getTestName(testGroup));
+				omrSheet.setVolume(Integer.parseInt(volume));
+				List<TestDTO> tests = ConnectedService.getTestByGroup(Integer.parseInt(testGroup), grade, Integer.parseInt(volume));
+				// Set testIds from tests to omrSheet
+				if (tests != null && !tests.isEmpty()) {
+					String[] testIds = {};
+					for(TestDTO dto : tests){
+						String tId = dto.getId();
+						testIds = Arrays.copyOf(testIds, testIds.length + 1);
+						testIds[testIds.length - 1] = tId;
+					}
+					omrSheet.setTestIds(testIds);
+				}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			
-
-
-
-			// Use ByteArrayOutputStream to hold the image data in memory
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(image, "jpg", baos);
-			byte[] imageBytes = baos.toByteArray();
-			
-			// Upload the image bytes directly to Azure
-			String fileName = branch + "_" + (i + 1) + "_" + System.currentTimeMillis() + ".jpg";
-
-			// Save image to static assets directory
-			String staticDir = "src/main/resources/static/assets/pdf";
-			File directory = new File(staticDir);
-			if (!directory.exists()) {
-				directory.mkdirs();
+				processed.add(omrSheet);
+				System.out.println("Returned: " + processed);
 			}
-			Path pdfPath = Paths.get(staticDir, fileName);
-			Files.write(pdfPath, imageBytes);
-
-			processMega(fileName);
-
-
-
-
-
-
-
-			// upload Jpg to Blob
-			uploadJpgToAzureBlob(fileName, imageBytes);
-			// uploadPdfToAzureBlob(fileName, imageBytes);
-			
-
-
-
-
-
-
-			//////// dummy data
-			// 3~6 random number
-			long stdTempId = 11200000 + (i+1);
-			Student stdTemp = studentService.getStudent(stdTempId);
-			int testId = new Random().nextInt(10) + 10;
-            
-
-			// english
-			StudentTestDTO dto1 = new StudentTestDTO();
-			dto1.setFileName(fileName);
-            dto1.setTestId((long)testId);
-            dto1.setTestName("Acer Test");
-            // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
-            dto1.setStudentId(stdTempId);
-            dto1.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
-            for(int j=0; j<40; j++) {
-                // generate radom number from 0 to 4
-                int radom = new Random().nextInt(5);
-                dto1.addAnswer(radom);
-            }
-
-
-			// math
-			StudentTestDTO dto2 = new StudentTestDTO();
-			dto2.setFileName(fileName);
-            dto2.setTestId((long)testId);
-            dto2.setTestName("Acer Test");
-            // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
-            dto2.setStudentId(stdTempId);
-            dto2.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
-            for(int j=0; j<40; j++) {
-                // generate radom number from 0 to 4
-                int radom = new Random().nextInt(5);
-                dto2.addAnswer(radom);
-            }
-
-			// GA
-			StudentTestDTO dto3 = new StudentTestDTO();
-			dto3.setFileName(fileName);
-            dto3.setTestId((long)testId);
-            dto3.setTestName("Acer Test");
-            // Long studentId = 11301580L;//(long)new Random().nextInt(50000);
-            dto3.setStudentId(stdTempId);
-            dto3.setStudentName(stdTemp.getFirstName() + " " + stdTemp.getLastName());
-            for(int j=0; j<40; j++) {
-                // generate radom number from 0 to 4
-                int radom = new Random().nextInt(5);
-                dto3.addAnswer(radom);
-            }
-
-
-			/// /////////////////////////////////
-			omrSheet.addStudentTest(dto1);
-			omrSheet.addStudentTest(dto2);
-			// omrSheet.addStudentTest(dto3);
-			processed.add(omrSheet);
-			System.out.println("Saved: " + fileName);
-
+		} finally {
+			// Clean up batch directory after all processing
+			try {
+				Files.walk(batchDir)
+					.sorted(Comparator.reverseOrder())
+					.forEach(path -> {
+						try {
+							Files.delete(path);
+						} catch (IOException e) {
+							System.err.println("Error deleting path: " + path);
+						}
+					});
+				System.out.println("Temporary directory cleaned up successfully: " + batchDir);
+			} catch (IOException e) {
+				System.err.println("Error cleaning up temporary directory: " + e.getMessage());
+			}
+			document.close();
 		}
-		document.close();
 
-		// 3. return the list
 		return processed;
 	}
 
@@ -309,23 +209,28 @@ public class OmrServiceImpl implements OmrService {
 
 	// Create file in Azure Blob Storage
 	private void uploadJpgToAzureBlob(String fileName, byte[] fileData) {
-		// Create a BlobServiceClient
-		BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
-		.connectionString(azureConnection)
-		.buildClient();
-		// Access the container: work
-		BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient("work");
-		// Define the full path inside the container (folder structure emulated using slashes)
-		String blobPath = JaeConstants.OMR_FOLDER + "/" + fileName;
-		// Get a blob client
-		BlobClient blobClient = containerClient.getBlobClient(blobPath);
-		// Set content-type
-		BlobHttpHeaders headers = new BlobHttpHeaders().setContentType("image/jpeg");
-		// Upload the file
-		blobClient.upload(new ByteArrayInputStream(fileData), fileData.length, true);
-		blobClient.setHttpHeaders(headers);
+		try {
+			// Create a BlobServiceClient
+			BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+			.connectionString(azureConnection)
+			.buildClient();
+			// Access the container: work
+			BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient("work");
+			// Define the full path inside the container
+			String blobPath = JaeConstants.OMR_FOLDER + "/" + fileName;
+			// Get a blob client
+			BlobClient blobClient = containerClient.getBlobClient(blobPath);
+			// Set content-type
+			BlobHttpHeaders headers = new BlobHttpHeaders().setContentType("image/jpeg");
+			// Upload the file
+			blobClient.upload(new ByteArrayInputStream(fileData), fileData.length, true);
+			blobClient.setHttpHeaders(headers);
 
-		System.out.println("Temp file uploaded to Azure >>> " + fileName);
+			// System.out.println("File uploaded to Azure successfully: " + fileName);
+		} catch (Exception e) {
+			System.err.println("Error uploading to Azure: " + e.getMessage());
+			throw new RuntimeException("Failed to upload file to Azure", e);
+		}
 	}
 	
 	// Create file in Azure Blob Storage for PDF files
@@ -351,16 +256,331 @@ public class OmrServiceImpl implements OmrService {
 	}
 
 	// process Mega/Revision sheet
-	private void processMega(String fileName){
-			// Use the file from static directory
-			String staticPath = "src/main/resources/static/assets/pdf/" + fileName;
-			// Process the file
-			RecognitionResult result = megaProcessor.recognizeImage(staticPath, 40);			
-			System.out.println("getCsv() : " + result.getCsv());
-			System.out.println("getJson() : " + result.getJson());
-			System.out.println("getOmrElement() : " + result.getOmrElements());
-			System.out.println("getTemplateName() : " + result.getTemplateName());	
+	private OmrSheetDTO processMega(String filePath) {
+		// Process the file directly using the full path
+		RecognitionResult processResult = megaProcessor.recognizeImage(filePath, OMR_THRESHOLD);			
+		String jsonResult = processResult.getJson();
+		// System.out.println("getJson() : " + jsonResult);
+		OmrSheetDTO dto = new OmrSheetDTO();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode rootNode = mapper.readTree(jsonResult);
+			JsonNode results = rootNode.path("RecognitionResults");
+			
+			// Initialize arrays for each group
+			int[] groupA = new int[30]; // Group 1 questions
+			int[] groupB = new int[30]; // Group 2 questions
+			int[] groupC = new int[30]; // Group 3 questions
+			String studentId = "";
+			
+			// Process each result
+			for (JsonNode result : results) {
+				String elementName = result.get("ElementName").asText();
+				String value = result.get("Value").asText();
+				
+				if ("Student_number".equals(elementName)) {
+					studentId = value;
+					if(StringUtils.isNotBlank(studentId)){
+						// avoid wrong studentId
+						try {
+							Long stdId = Long.parseLong(studentId);
+							String studentName = studentService.getStudentName(stdId);
+							dto.setStudentId(stdId);
+							dto.setStudentName(studentName);	
+						} catch (NumberFormatException nfe) {
+							// skip if studentId is not a valid number
+							continue;
+						}
+					}
+				}				
+				// Parse group questions (Group_X_QY format)
+				if (elementName.startsWith("Group_")) {
+					// Extract group number and question number
+					String[] parts = elementName.split("_");
+					if (parts.length == 3) {
+						int groupNum = Integer.parseInt(parts[1]);
+						int questionNum = Integer.parseInt(parts[2].substring(1)) - 1; // Convert Q1 to 0-based index
+						
+						// Convert answer to numeric value (A=1, B=2, C=3, D=4)
+						int numericValue = 0;
+						if (!value.isEmpty() && !value.contains(",")) { // Skip empty or multiple answers
+							switch (value) {
+								case "A": numericValue = 1; break;
+								case "B": numericValue = 2; break;
+								case "C": numericValue = 3; break;
+								case "D": numericValue = 4; break;
+								default: numericValue = 0;
+							}
+						}
+						
+						// Assign to appropriate group
+						switch (groupNum) {
+							case 1: groupA[questionNum] = numericValue; break;
+							case 2: groupB[questionNum] = numericValue; break;
+							case 3: groupC[questionNum] = numericValue; break;
+						}
+					}
+				}
+			}
+			
+			// Add answers to DTO - each group as a separate array
+			dto.addAnswer(groupA);
+			dto.addAnswer(groupB);
+			dto.addAnswer(groupC);
+			
+		} catch (Exception e) {
+			System.err.println("Error parsing OMR results: " + e.getMessage());
+		}
+		return dto;
 	}
+
+	private OmrSheetDTO parseOmrMegaResults(String jsonResult) {
+		OmrSheetDTO dto = new OmrSheetDTO();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode rootNode = mapper.readTree(jsonResult);
+			JsonNode results = rootNode.path("RecognitionResults");
+			
+			// Initialize arrays for each group
+			int[] groupA = new int[30]; // Group 1 questions
+			int[] groupB = new int[30]; // Group 2 questions
+			int[] groupC = new int[30]; // Group 3 questions
+			String studentId = "";
+			
+			// Process each result
+			for (JsonNode result : results) {
+				String elementName = result.get("ElementName").asText();
+				String value = result.get("Value").asText();
+				
+				if ("Student_number".equals(elementName)) {
+					studentId = value;
+					if(StringUtils.isNotBlank(studentId)){
+						// avoid wrong studentId
+						try {
+							Long stdId = Long.parseLong(studentId);
+							String studentName = studentService.getStudentName(stdId);
+							dto.setStudentId(stdId);
+							dto.setStudentName(studentName);	
+						} catch (NumberFormatException nfe) {
+							// skip if studentId is not a valid number
+							continue;
+						}
+						// String studentName = studentService.getStudentName(Long.parseLong(studentId));
+						// dto.setStudentId(Long.parseLong(studentId));
+						// dto.setStudentName(studentName);	
+					}
+				}
+				
+				// Parse group questions (Group_X_QY format)
+				if (elementName.startsWith("Group_")) {
+					// Extract group number and question number
+					String[] parts = elementName.split("_");
+					if (parts.length == 3) {
+						int groupNum = Integer.parseInt(parts[1]);
+						int questionNum = Integer.parseInt(parts[2].substring(1)) - 1; // Convert Q1 to 0-based index
+						
+						// Convert answer to numeric value (A=1, B=2, C=3, D=4)
+						int numericValue = 0;
+						if (!value.isEmpty() && !value.contains(",")) { // Skip empty or multiple answers
+							switch (value) {
+								case "A": numericValue = 1; break;
+								case "B": numericValue = 2; break;
+								case "C": numericValue = 3; break;
+								case "D": numericValue = 4; break;
+								default: numericValue = 0;
+							}
+						}
+						
+						// Assign to appropriate group
+						switch (groupNum) {
+							case 1: groupA[questionNum] = numericValue; break;
+							case 2: groupB[questionNum] = numericValue; break;
+							case 3: groupC[questionNum] = numericValue; break;
+						}
+					}
+				}
+			}
+			
+			// Add answers to DTO - each group as a separate array
+			dto.addAnswer(groupA);
+			dto.addAnswer(groupB);
+			dto.addAnswer(groupC);
+			
+		} catch (Exception e) {
+			System.err.println("Error parsing OMR results: " + e.getMessage());
+		}
+		return dto;
+	}
+
+	// process Mega/Revision sheet
+	private OmrSheetDTO processTT(String filePath){
+		// Process the file directly from the provided path
+		RecognitionResult processResult = ttProcessor.recognizeImage(filePath, OMR_THRESHOLD);			
+		String jsonResult = processResult.getJson();
+		// Parse the results into groups
+		// return dto;
+		OmrSheetDTO dto = new OmrSheetDTO();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode rootNode = mapper.readTree(jsonResult);
+			JsonNode results = rootNode.path("RecognitionResults");
+			
+			// Initialize arrays for each group
+			int[] group1 = new int[60]; // Group 1 questions 1-60
+			int[] group2 = new int[60]; // Group 2 questions 1-60
+			String studentId = "";
+			
+			// Process each result
+			for (JsonNode result : results) {
+				String elementName = result.get("ElementName").asText();
+				String value = result.get("Value").asText();
+
+				// INSERT_YOUR_CODE
+				// System.out.println("ElementName: " + elementName + ", Value: " + value);
+
+				if ("Student_number".equals(elementName)) {
+					studentId = value;
+					if(StringUtils.isNotBlank(studentId)){
+						// avoid wrong studentId
+						try {
+							Long stdId = Long.parseLong(studentId);
+							String studentName = studentService.getStudentName(stdId);
+							dto.setStudentId(stdId);
+							dto.setStudentName(studentName);	
+						} catch (NumberFormatException nfe) {
+							// skip if studentId is not a valid number
+							continue;
+						}
+					}
+				}
+				
+				// Parse group questions (Group_X_QY format)
+				if (elementName.startsWith("Group_")) {
+					// Extract group number and question number
+					String[] parts = elementName.split("_");
+					if (parts.length == 3) {
+						int groupNum = Integer.parseInt(parts[1]);
+						int questionNum = Integer.parseInt(parts[2].substring(1)) - 1; // Convert Q1 to 0-based index
+						
+						// Convert answer to numeric value (A=1, B=2, C=3, D=4, E=5)
+						int numericValue = 0;
+						if (!value.isEmpty() && !value.contains(",")) { // Skip empty or multiple answers
+							switch (value) {
+								case "A": numericValue = 1; break;
+								case "B": numericValue = 2; break;
+								case "C": numericValue = 3; break;
+								case "D": numericValue = 4; break;
+								case "E": numericValue = 5; break;
+								default: numericValue = 0;
+							}
+						}
+						
+						// Assign to appropriate group array
+						if (groupNum == 1) {
+							group1[questionNum] = numericValue;
+						} else if (groupNum == 2) {
+							group2[questionNum] = numericValue;
+						}
+					}
+				}
+			}
+
+				// Print results for verification
+			System.out.println("Student ID: " + studentId);
+			System.out.println("Group 1: " + Arrays.toString(group1));
+			System.out.println("Group 2: " + Arrays.toString(group2));
+			
+			// Add answers to DTO - each group as a separate array
+			dto.addAnswer(group1);
+			dto.addAnswer(group2);
+			
+		} catch (Exception e) {
+			System.err.println("Error parsing OMR results: " + e.getMessage());
+		}
+		return dto;
+	}
+
+	// private OmrSheetDTO parseOmrTTResults(String jsonResult) {
+	// 	OmrSheetDTO dto = new OmrSheetDTO();
+	// 	try {
+	// 		ObjectMapper mapper = new ObjectMapper();
+	// 		JsonNode rootNode = mapper.readTree(jsonResult);
+	// 		JsonNode results = rootNode.path("RecognitionResults");
+			
+	// 		// Initialize arrays for each group
+	// 		int[] group1 = new int[60]; // Group 1 questions 1-60
+	// 		int[] group2 = new int[60]; // Group 2 questions 1-60
+	// 		String studentId = "";
+			
+	// 		// Process each result
+	// 		for (JsonNode result : results) {
+	// 			String elementName = result.get("ElementName").asText();
+	// 			String value = result.get("Value").asText();
+
+	// 			// INSERT_YOUR_CODE
+	// 			// System.out.println("ElementName: " + elementName + ", Value: " + value);
+
+	// 			if ("Student_number".equals(elementName)) {
+	// 				studentId = value;
+	// 				if(StringUtils.isNotBlank(studentId)){
+	// 					// avoid wrong studentId
+	// 					try {
+	// 						Long stdId = Long.parseLong(studentId);
+	// 						String studentName = studentService.getStudentName(stdId);
+	// 						dto.setStudentId(stdId);
+	// 						dto.setStudentName(studentName);	
+	// 					} catch (NumberFormatException nfe) {
+	// 						// skip if studentId is not a valid number
+	// 						continue;
+	// 					}
+	// 				}
+	// 			}
+				
+	// 			// Parse group questions (Group_X_QY format)
+	// 			if (elementName.startsWith("Group_")) {
+	// 				// Extract group number and question number
+	// 				String[] parts = elementName.split("_");
+	// 				if (parts.length == 3) {
+	// 					int groupNum = Integer.parseInt(parts[1]);
+	// 					int questionNum = Integer.parseInt(parts[2].substring(1)) - 1; // Convert Q1 to 0-based index
+						
+	// 					// Convert answer to numeric value (A=1, B=2, C=3, D=4, E=5)
+	// 					int numericValue = 0;
+	// 					if (!value.isEmpty() && !value.contains(",")) { // Skip empty or multiple answers
+	// 						switch (value) {
+	// 							case "A": numericValue = 1; break;
+	// 							case "B": numericValue = 2; break;
+	// 							case "C": numericValue = 3; break;
+	// 							case "D": numericValue = 4; break;
+	// 							case "E": numericValue = 5; break;
+	// 							default: numericValue = 0;
+	// 						}
+	// 					}
+						
+	// 					// Assign to appropriate group array
+	// 					if (groupNum == 1) {
+	// 						group1[questionNum] = numericValue;
+	// 					} else if (groupNum == 2) {
+	// 						group2[questionNum] = numericValue;
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+
+	// 			// Print results for verification
+	// 		System.out.println("Student ID: " + studentId);
+	// 		System.out.println("Group 1: " + Arrays.toString(group1));
+	// 		System.out.println("Group 2: " + Arrays.toString(group2));
+			
+	// 		// Add answers to DTO - each group as a separate array
+	// 		dto.addAnswer(group1);
+	// 		dto.addAnswer(group2);
+			
+	// 	} catch (Exception e) {
+	// 		System.err.println("Error parsing OMR results: " + e.getMessage());
+	// 	}
+	// 	return dto;
+	// }
 		
 	
 }

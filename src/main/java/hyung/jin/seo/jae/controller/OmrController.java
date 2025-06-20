@@ -44,16 +44,18 @@ public class OmrController {
      * @return
      */
     @PostMapping("/preview")
-    public ResponseEntity<List<OmrSheetDTO>> previewOmr(@RequestParam("branch") String branch, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<List<OmrSheetDTO>> previewOmr(@RequestParam("branch") String branch,
+                                                        @RequestParam("testGroup") String testGroup,
+                                                        @RequestParam("grade") String grade,
+                                                        @RequestParam("volume") String volume,                                                    
+                                                        @RequestParam("file") MultipartFile file) {
         // Validate the file
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>()); // Return an empty list for invalid requests
         }
         try {
             // Process the file and generate results
-            List<OmrSheetDTO> results = omrService.previewOmr(branch, file);//processOmrImage();//omrService.processOmrFile(branch, file);
-            // Return the results
-            //System.out.println("results: >>>>>>>>>> " + results);
+            List<OmrSheetDTO> results = omrService.previewOmr(branch, testGroup, grade, volume, file);
             return ResponseEntity.ok(results);
         } catch (IOException e) {
             e.printStackTrace();
