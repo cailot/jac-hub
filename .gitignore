@@ -9,3 +9,7 @@ src/main/resources/application.properties
 target/classes/application.properties
 src/main/resources/application.properties
 target/ROOT/WEB-INF/classes/application.properties
+
+# OMR files and directories
+**/omr/
+src/main/resources/omr/
