@@ -394,9 +394,9 @@ public interface JaeConstants {
 	
 	String EDU_TEST = "3";
 	
-	String ACER_TEST = "4";
+	String ACER_TEST = "3";
 	
-	String MOCK_TEST = "5";
+	String MOCK_TEST = "4";
 
 	////////////////////////////////////
 	//

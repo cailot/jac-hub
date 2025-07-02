@@ -95,7 +95,8 @@
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-omr</artifactId>
-            <version>24.12</version>
+            <!-- <version>24.12</version> -->
+            <version>25.7</version>
         </dependency>
         <!--PDF Box -->
         <dependency>
@@ -140,6 +141,13 @@
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty-http</artifactId>
             <version>1.0.34</version>
+        </dependency>
+        <!-- SendGrid -->
+        <!-- https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java -->
+        <dependency>
+            <groupId>com.sendgrid</groupId>
+            <artifactId>sendgrid-java</artifactId>
+            <version>4.9.3</version>
         </dependency>
 
     </dependencies>

@@ -3,10 +3,7 @@ package hyung.jin.seo.jae.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import hyung.jin.seo.jae.dto.OmrSheetDTO;
-import hyung.jin.seo.jae.dto.StudentTestDTO;
 import hyung.jin.seo.jae.service.OmrService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,15 +23,6 @@ public class OmrController {
     @Autowired
     private OmrService omrService;
 
-    // @Value("${output.directory}")
-    // private String outputDir;
-
-
-    @GetMapping("/hi")
-    public String getMethodName() {
-        return "Hello Jin";
-    }
-    
     /**
      * Preview the OMR results
      * @param branch

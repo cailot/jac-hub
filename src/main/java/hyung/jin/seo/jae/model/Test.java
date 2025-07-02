@@ -45,8 +45,8 @@ public class Test{
     @Column
     private boolean active;
 
-    @Column
-    private boolean processed;
+    // @Column
+    // private boolean processed;
 
     @Column
     private double average;

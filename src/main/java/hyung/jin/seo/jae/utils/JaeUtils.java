@@ -251,11 +251,11 @@ public class JaeUtils {
 	public static String getTestName(String value){
 		String testText = "";
 		switch(value) {
-			case "1": testText = "Mega Test"; break;
-			case "2": testText = "Revision Test"; break;
-			case "3": testText = "Edu Test"; break;
-			case "4": testText = "Acer Test"; break;
-			case "5": testText = "Mock Test"; break;
+			case "1": testText = "MEGA Test"; break;
+			case "2": testText = "REVISION Test"; break;
+			case "3": testText = "TT6 / TT8 / JMSS"; break;
+			// case "4": testText = "Acer Test"; break;
+			case "4": testText = "Mock Test"; break;
 		}
 		return testText;
 
